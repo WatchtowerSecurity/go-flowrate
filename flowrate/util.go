@@ -53,6 +53,7 @@ func percentOf(x, total float64) Percent {
 	return Percent(math.MaxUint32)
 }
 
+// Float returns a float64.
 func (p Percent) Float() float64 {
 	return float64(p) * 1e-3
 }

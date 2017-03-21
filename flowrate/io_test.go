@@ -36,8 +36,10 @@ func TestReader(t *testing.T) {
 	for i := range in {
 		in[i] = byte(i)
 	}
+
 	b := make([]byte, 100)
-	r := NewReader(bytes.NewReader(in), 100)
+	hundred := int64(100)
+	r := NewReader(bytes.NewReader(in), &hundred)
 	start := time.Now()
 
 	// Make sure r implements Limiter
