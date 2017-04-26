@@ -29,12 +29,12 @@ type Reader struct {
 	io.Reader // Data source
 	*Monitor  // Flow control monitor
 
-	limit *int64 // Rate limit in bytes per second (unlimited when <= 0)
-	block bool   // What to do when no new bytes can be read due to the limit
+	limit *Rate // Rate limit in bytes per second (unlimited when <= 0)
+	block bool  // What to do when no new bytes can be read due to the limit
 }
 
 // NewReader restricts all Read operations on r to limit bytes per second.
-func NewReader(r io.Reader, limit *int64) *Reader {
+func NewReader(r io.Reader, limit *Rate) *Reader {
 	return &Reader{r, New(0, 0), limit, true}
 }
 
@@ -42,7 +42,7 @@ func NewReader(r io.Reader, limit *int64) *Reader {
 // rate limit. It returns (0, nil) immediately if r is non-blocking and no new
 // bytes can be read at this time.
 func (r *Reader) Read(p []byte) (n int, err error) {
-	p = p[:r.Limit(len(p), *r.limit, r.block)]
+	p = p[:r.Limit(len(p), r.limit.Get(), r.block)]
 	if len(p) > 0 {
 		n, err = r.IO(r.Reader.Read(p))
 	}
@@ -51,8 +51,8 @@ func (r *Reader) Read(p []byte) (n int, err error) {
 
 // SetLimit changes the transfer rate limit to new bytes per second and returns
 // the previous setting.
-func (r *Reader) SetLimit(new *int64) (old int64) {
-	old, r.limit = *r.limit, new
+func (r *Reader) SetLimit(new int64) (old int64) {
+	old = r.limit.Change(new)
 	return
 }
 

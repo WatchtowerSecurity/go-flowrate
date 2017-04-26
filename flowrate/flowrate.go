@@ -12,6 +12,33 @@ import (
 	"time"
 )
 
+// Rate ..
+type Rate struct {
+	sync.Mutex
+	Rate int64
+}
+
+// Change ..
+func (b *Rate) Change(new int64) (old int64) {
+	if b == nil {
+		return 0
+	}
+	b.Lock()
+	defer b.Unlock()
+	old, b.Rate = b.Rate, new
+	return
+}
+
+// Get ...
+func (b *Rate) Get() (size int64) {
+	if b == nil {
+		return 0
+	}
+	b.Lock()
+	defer b.Unlock()
+	return b.Rate
+}
+
 // Monitor monitors and limits the transfer rate of a data stream.
 type Monitor struct {
 	mu      sync.Mutex    // Mutex guarding access to all internal fields
